@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Khmer Dubbing PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --bg2: #111318;
+    --bg3: #181c22;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --gold: #e8a530;
+    --gold2: #f5c56a;
+    --gold-dim: rgba(232,165,48,0.12);
+    --gold-glow: rgba(232,165,48,0.06);
+    --green: #2ecc7a;
+    --green-dim: rgba(46,204,122,0.1);
+    --red: #e85555;
+    --text: #e8e6e0;
+    --text2: #8a8880;
+    --text3: #5a5856;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+  }
+  .wrap { width: 100%; max-width: 740px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* HEADER */
+  .header { text-align: center; padding: 12px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .header-badge {
+    display: inline-block;
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,165,48,0.25);
+    color: var(--gold);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+  }
+  .header h1 { font-family: 'Battambang', serif; font-size: 28px; font-weight: 700; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+  .header .sub { font-size: 13px; color: var(--text2); }
+  .header .sub span { color: var(--gold); font-weight: 500; }
+
+  /* CARD */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; }
+  .card-title {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text3); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before { content: ''; display: block; width: 4px; height: 4px; background: var(--gold); border-radius: 50%; }
+
+  /* UPLOAD */
+  .upload-zone { border: 1px dashed var(--border2); border-radius: var(--radius); padding: 36px 24px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--gold); background: var(--gold-glow); }
+  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 36px; margin-bottom: 10px; display: block; }
+  .upload-main { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .upload-sub { font-size: 12px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; }
+  .file-selected { display: none; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius); margin-top: 12px; }
+  .file-selected.show { display: flex; }
+  .file-name { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .file-size { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+
+  /* OPTIONS */
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .opt-label { font-size: 11px; color: var(--text3); font-family: 'IBM Plex Mono', monospace; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn { flex: 1; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius); background: transparent; color: var(--text2); font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .toggle-btn:hover { color: var(--text); }
+  .toggle-btn.active { background: var(--gold-dim); border-color: rgba(232,165,48,0.4); color: var(--gold); }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .switch-info .title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .switch-info .desc { font-size: 11px; color: var(--text3); }
+  .switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; cursor: pointer; transition: 0.2s; }
+  .slider::before { content: ''; position: absolute; width: 16px; height: 16px; top: 3px; left: 3px; background: var(--text3); border-radius: 50%; transition: 0.2s; }
+  .switch input:checked + .slider { background: var(--gold-dim); border-color: rgba(232,165,48,0.4); }
+  .switch input:checked + .slider::before { transform: translateX(20px); background: var(--gold); }
+
+  /* STEPS */
+  .steps { display: flex; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--border); }
+  .step { flex: 1; padding: 10px 8px; text-align: center; border-right: 1px solid var(--border); font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--text3); transition: all 0.3s; position: relative; overflow: hidden; }
+  .step:last-child { border-right: none; }
+  .step .step-num { font-size: 18px; display: block; margin-bottom: 2px; }
+  .step.active { background: var(--gold-dim); color: var(--gold); }
+  .step.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold); animation: pulse-bar 1.5s ease-in-out infinite; }
+  .step.done { background: var(--green-dim); color: var(--green); }
+  @keyframes pulse-bar { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* BUTTONS */
+  .start-btn { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: var(--radius); color: #0a0c0f; font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .start-btn:hover { background: var(--gold2); }
+  .start-btn:disabled { background: var(--bg3); border: 1px solid var(--border); color: var(--text3); cursor: not-allowed; }
+  .start-btn .spinner { width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.2); border-top-color: #0a0c0f; border-radius: 50%; animation: spin 0.8s linear infinite; display: none; }
+  .start-btn.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* PROGRESS */
+  .progress-wrap { background: var(--bg3); border-radius: 4px; height: 4px; overflow: hidden; margin-top: 4px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 4px; width: 0%; transition: width 0.5s ease; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text3); margin-top: 6px; }
+  .progress-info .status { color: var(--text2); }
+
+  /* LOG */
+  .log-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; height: 240px; overflow-y: auto; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text3); line-height: 1.7; }
+  .log-box::-webkit-scrollbar { width: 4px; }
+  .log-box::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .log-line { display: block; }
+  .log-line.info { color: var(--text2); }
+  .log-line.success { color: var(--green); }
+  .log-line.error { color: var(--red); }
+  .log-line.head { color: var(--gold); }
+
+  /* DONE CARD */
+  .done-card { display: none; background: var(--green-dim); border: 1px solid rgba(46,204,122,0.25); border-radius: var(--radius-lg); padding: 20px 24px; }
+  .done-card.show { display: block; }
+  .done-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+  .done-icon { font-size: 32px; flex-shrink: 0; }
+  .done-title { font-size: 17px; font-weight: 600; color: var(--green); margin-bottom: 2px; }
+  .done-filename { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); word-break: break-all; }
+
+  /* DOWNLOAD BUTTON */
+  .dl-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 14px;
+    background: var(--green); border: none; border-radius: var(--radius);
+    color: #0a0c0f; font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; text-decoration: none; transition: all 0.2s;
+  }
+  .dl-btn:hover { opacity: 0.85; }
+  .dl-note { font-size: 11px; color: var(--text3); text-align: center; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* SERVER BADGE */
+  .server-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); color: var(--text3); background: var(--bg3); cursor: default; }
+  .server-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); transition: 0.2s; }
+  .server-badge.connected .server-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s ease-in-out infinite; }
+  .server-badge.connected { color: var(--text2); }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .header-row { display: flex; justify-content: flex-end; margin-bottom: -8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header-row">
+    <div class="server-badge" id="serverBadge">
+      <div class="server-dot"></div>
+      <span id="serverStatus">SERVER OFFLINE</span>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="header-badge">AI Powered</div>
+    <h1>ប្រព័ន្ធ Dubbing ខ្មែរ</h1>
+    <div class="sub">AI Khmer Video Dubbing PRO &nbsp;·&nbsp; by <span>SEM SAMNANG</span></div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="card">
+    <div class="card-title">Select Video</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept=".mp4,.mkv,.avi,.mov" onchange="onFileSelect(event)">
+      <span class="upload-icon">🎬</span>
+      <div class="upload-main">Drag & Drop or Click to Select</div>
+      <div class="upload-sub">.mp4 &nbsp;·&nbsp; .mkv &nbsp;·&nbsp; .avi &nbsp;·&nbsp; .mov</div>
+    </div>
+    <div class="file-selected" id="fileSelected">
+      <span style="font-size:24px">📹</span>
+      <span class="file-name" id="fileName">—</span>
+      <span class="file-size" id="fileSize">—</span>
+    </div>
+  </div>
+
+  <!-- OPTIONS -->
+  <div class="card">
+    <div class="card-title">Settings</div>
+    <div class="options-grid">
+      <div>
+        <div class="opt-label">Voice</div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btn-female" onclick="setVoice('female')">👩 Female</button>
+          <button class="toggle-btn" id="btn-male" onclick="setVoice('male')">👨 Male</button>
+        </div>
+      </div>
+      <div>
+        <div class="opt-label">Quality</div>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="btn-base" onclick="setModel('base')">⚡ Base</button>
+          <button class="toggle-btn" id="btn-large" onclick="setModel('large')">🎯 Large</button>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="switch-row">
+      <div class="switch-info">
+        <div class="title">🎵 Keep Background Music</div>
+        <div class="desc">ទុករក្សាតន្ត្រីផ្ទៃខាងក្រោយ</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="bgmToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="steps" id="stepsRow" style="display:none;">
+    <div class="step" id="s1"><span class="step-num">🎙️</span>Whisper</div>
+    <div class="step" id="s2"><span class="step-num">🎵</span>BGM</div>
+    <div class="step" id="s3"><span class="step-num">🌐</span>Translate</div>
+    <div class="step" id="s4"><span class="step-num">🔊</span>TTS</div>
+    <div class="step" id="s5"><span class="step-num">🎞️</span>Merge</div>
+  </div>
+
+  <!-- START -->
+  <button class="start-btn" id="startBtn" onclick="startDubbing()">
+    <div class="spinner"></div>
+    <span id="startLabel">▶ START DUBBING</span>
+  </button>
+
+  <!-- PROGRESS -->
+  <div class="card" id="progressCard" style="display:none;">
+    <div class="card-title">Progress</div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-info">
+      <span class="status" id="progressStatus">Initializing...</span>
+      <span id="progressPct">0%</span>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="card" id="logCard" style="display:none;">
+    <div class="card-title">Log</div>
+    <div class="log-box" id="logBox"></div>
+  </div>
+
+  <!-- DONE + DOWNLOAD -->
+  <div class="done-card" id="doneCard">
+    <div class="done-top">
+      <div class="done-icon">✅</div>
+      <div>
+        <div class="done-title">Dubbing Complete!</div>
+        <div class="done-filename" id="doneFilename">—</div>
+      </div>
+    </div>
+    <a class="dl-btn" id="dlBtn" href="#" download>
+      ⬇ Download Video (MP4)
+    </a>
+    <div class="dl-note">Works on iPhone • Android • Computer</div>
+  </div>
+
+</div>
+
+<script>
+  // ====================================================
+  // Server IP Configuration
+  // ====================================================
+  const API = 'http://192.168.1.100:8000';
+  // ====================================================
+
+  let selectedFile = null;
+  let voiceChoice  = 'female';
+  let modelChoice  = 'base';
+  let polling      = null;
+  let serverOk     = false;
+  let currentJobId = null;
+
+  function setVoice(v) {
+    voiceChoice = v;
+    document.getElementById('btn-female').classList.toggle('active', v === 'female');
+    document.getElementById('btn-male').classList.toggle('active', v === 'male');
+  }
+
+  function setModel(m) {
+    modelChoice = m;
+    document.getElementById('btn-base').classList.toggle('active', m === 'base');
+    document.getElementById('btn-large').classList.toggle('active', m === 'large');
+  }
+
+  function formatBytes(b) {
+    if (b > 1e9) return (b/1e9).toFixed(1) + ' GB';
+    if (b > 1e6) return (b/1e6).toFixed(1) + ' MB';
+    return (b/1e3).toFixed(0) + ' KB';
+  }
+
+  function onFileSelect(e) {
+    const f = e.target.files[0];
+    if (!f) return;
+    selectedFile = f;
+    document.getElementById('fileName').textContent = f.name;
+    document.getElementById('fileSize').textContent = formatBytes(f.size);
+    document.getElementById('fileSelected').classList.add('show');
+  }
+
+  const uploadZone = document.getElementById('uploadZone');
+  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+  uploadZone.addEventListener('drop', e => {
+    e.preventDefault(); uploadZone.classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) {
+      selectedFile = f;
+      document.getElementById('fileName').textContent = f.name;
+      document.getElementById('fileSize').textContent = formatBytes(f.size);
+      document.getElementById('fileSelected').classList.add('show');
+    }
+  });
+
+  function log(text, type = '') {
+    const box  = document.getElementById('logBox');
+    const span = document.createElement('span');
+    span.className   = 'log-line ' + type;
+    span.textContent = text;
+    box.appendChild(span);
+    box.appendChild(document.createElement('br'));
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function setStep(n) {
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById('s' + i);
+      el.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+  }
+
+  async function startDubbing() {
+    if (!selectedFile) { alert('Please select a video first!'); return; }
+    if (!serverOk)     { alert('Server is offline!\nRun: python backend.py'); return; }
+
+    const btn = document.getElementById('startBtn');
+    btn.disabled = true;
+    btn.classList.add('loading');
+    document.getElementById('startLabel').textContent = 'UPLOADING...';
+
+    document.getElementById('stepsRow').style.display  = 'flex';
+    document.getElementById('progressCard').style.display = 'block';
+    document.getElementById('logCard').style.display   = 'block';
+    document.getElementById('doneCard').classList.remove('show');
+    document.getElementById('logBox').innerHTML = '';
+
+    log('='.repeat(50), 'head');
+    log('AI Khmer Dubbing PRO — Starting', 'head');
+    log('='.repeat(50), 'head');
+
+    const form = new FormData();
+    form.append('video',    selectedFile);
+    form.append('voice',    voiceChoice);
+    form.append('model',    modelChoice);
+    form.append('keep_bgm', document.getElementById('bgmToggle').checked ? '1' : '0');
+
+    try {
+      const res  = await fetch(`${API}/upload`, { method: 'POST', body: form });
+      const data = await res.json();
+      if (!data.job_id) throw new Error(data.detail || 'Upload failed');
+      currentJobId = data.job_id;
+      log(`Job ID: ${data.job_id}`, 'info');
+      document.getElementById('startLabel').textContent = 'PROCESSING...';
+      pollStatus(data.job_id);
+    } catch (err) {
+      log('ERROR: ' + err.message, 'error');
+      resetBtn();
+    }
+  }
+
+  function pollStatus(jobId) {
+    polling = setInterval(async () => {
+      try {
+        const res = await fetch(`${API}/status/${jobId}`);
+        const d   = await res.json();
+
+        setProgress(d.progress || 0, d.status || '');
+        if (d.step !== undefined) setStep(d.step);
+
+        if (d.logs && d.logs.length) {
+          d.logs.forEach(l => {
+            const type = l.startsWith('ERROR') ? 'error' :
+                         l.startsWith('[')     ? 'head'  :
+                         l.includes('COMPLETE') || l.startsWith('✅') ? 'success' : 'info';
+            log(l, type);
+          });
+        }
+
+        if (d.state === 'done') {
+          clearInterval(polling);
+          setProgress(100, 'DONE!');
+          setStep(6);
+
+          const fname = d.output_filename || 'Khmer_output.mp4';
+          document.getElementById('doneFilename').textContent = fname;
+          
+          // Create download link with native browser download
+          const dlBtn = document.getElementById('dlBtn');
+          dlBtn.href = `${API}/download/${jobId}`;
+          dlBtn.setAttribute('download', fname);
+          dlBtn.setAttribute('target', '_blank');
+          
+          document.getElementById('doneCard').classList.add('show');
+          log('✅ DUBBING COMPLETE! Click Download to save', 'success');
+          resetBtn(true);
+        } else if (d.state === 'error') {
+          clearInterval(polling);
+          log('ERROR: ' + (d.error || 'Unknown error'), 'error');
+          resetBtn();
+        }
+      } catch (e) {
+        log('Connection error: ' + e.message, 'error');
+      }
+    }, 1500);
+  }
+
+  function setProgress(pct, msg) {
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = Math.round(pct) + '%';
+    if (msg) document.getElementById('progressStatus').textContent = msg;
+  }
+
+  function resetBtn(done = false) {
+    const btn = document.getElementById('startBtn');
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    document.getElementById('startLabel').textContent = done ? '▶ START NEW VIDEO' : '▶ START DUBBING';
+  }
+
+  async function checkServer() {
+    try {
+      const r  = await fetch(`${API}/ping`, { signal: AbortSignal.timeout(2000) });
+      serverOk = r.ok;
+      const badge = document.getElementById('serverBadge');
+      badge.className = 'server-badge' + (serverOk ? ' connected' : '');
+      document.getElementById('serverStatus').textContent = serverOk ? 'SERVER ONLINE' : 'SERVER OFFLINE';
+    } catch {
+      serverOk = false;
+      document.getElementById('serverBadge').className = 'server-badge';
+      document.getElementById('serverStatus').textContent = 'SERVER OFFLINE';
+    }
+  }
+
+  checkServer();
+  setInterval(checkServer, 5000);
+</script>
+</body>
+</html>
